@@ -1,3 +1,9 @@
+"""
+激活检查点是一种以计算时间换内存的技术。通常情况下, 前向传递时的激活值会被保存, 
+用于反向传播期间的梯度计算。而检查点区域中的前向计算省略了为反向传播保存激活值, 而是在反向传播期间重新计算它们。
+具体而言, 在前向传递中，函数将以 torch.no_grad() 的方式运行, 即不保存中间激活值。
+计算速度会变慢, 内存压力变小。
+"""
 from importlib.util import find_spec
 from typing import Any, Tuple, List, Callable, Optional
 
@@ -49,7 +55,9 @@ def checkpoint_blocks(
             Size of each chunk. A higher value corresponds to fewer 
             checkpoints, and trades memory for speed. If None, no checkpointing 
             is performed.
-            每个块的大小。较高的值对应较少的检查点，并以内存换取速度。如果为 None, 则不执行检查点。
+            每个检查点包含的block数量。
+            #? 较高的值对应较少的检查点, 此时内存的消耗理应更小, 速度理应更慢。但是此处原文含义是相反的？
+            如果为 None, 则不执行检查点。
     Returns:
         The output of the final block
     """
@@ -82,7 +90,9 @@ def checkpoint_blocks(
     elif blocks_per_ckpt < 1 or blocks_per_ckpt > len(blocks):
         raise ValueError("blocks_per_ckpt must be between 1 and len(blocks)")
 
-    checkpoint = get_checkpoint_fn() 
+    #* checkpoint函数(以torch.utils.checkpoint.checkpoint为例), 其实就是对于传入的函数只计算输入和输出的激活值。
+    #* 将多个模块包含在单个检查点中, 意味着中间的激活值不会被计算
+    checkpoint = get_checkpoint_fn()
     # 分块运行并执行激活检查点
     for s in range(0, len(blocks), blocks_per_ckpt):
         e = s + blocks_per_ckpt

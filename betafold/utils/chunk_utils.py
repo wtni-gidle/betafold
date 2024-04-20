@@ -211,7 +211,7 @@ def chunk_layer(
 
     在"batch-like" dimension上分块
 
-    for each type of layer in the network, we identify a "batch-like" dimension 
+    For each type of layer in the network, we identify a "batch-like" dimension 
     where the computation is independent along that dimension. We then execute 
     the layer one "chunk" at a time, meaning that only the intermediate activations for that chunk
     need to be stored in memory at a given time. Thus, reducing the chunk size improves memory efficiency, 
