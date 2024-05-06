@@ -131,6 +131,7 @@ def dict_multimap(fn: Callable[[List], Any], dicts: List[Dict]) -> Dict:
 
 def one_hot(x: torch.Tensor, v_bins: torch.Tensor) -> torch.Tensor:
     """
+    Algorithm 5 One-hot encoding with nearest bin
     将输入张量编码为 one-hot 形式。
 
     Args:
